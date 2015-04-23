@@ -1,2 +1,11 @@
-# Created by .ignore support plugin (hsz.mobi)
+﻿################################################################################
+# Данный GITIGNORE-файл был автоматически создан Microsoft(R) Visual Studio.
+################################################################################
+
+/log.txt
+/crmbb.iml
+
+node_modules
 .idea
+crmbb.iml
+Web.config
