@@ -29,7 +29,8 @@
             );
             } else {
                 logWriter.log('access.js users.findById error' + err);
-                res.send(500, { error: 'access.js users.findById error' });
+                //res.send(500, { error: 'access.js users.findById error' });
+                callback({error: err});
             }
         });
     };
