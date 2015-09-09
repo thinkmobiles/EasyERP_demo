@@ -4,6 +4,9 @@ var url = require('url');
 var fs = require("fs");
 var path = require('path');
 
+var multipart = require('connect-multiparty');
+var multipartMiddleware = multipart();
+
 var mongoose = require('mongoose');
 var dbsArray = [];
 var dbsNames = [];
@@ -129,7 +132,7 @@ app.get('/getModules', function (req, res) {
     requestHandler.getModules(req, res);
 });
 
-app.post('/uploadFiles', function (req, res, next) {
+app.post('/uploadFiles', multipartMiddleware, function (req, res, next) {
     var os = require("os");
     var osType = (os.type().split('_')[0]);
     var dir;

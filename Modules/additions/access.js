@@ -2,35 +2,35 @@
     var getAccess = function (req, uId, mid, callback) { 
         models.get(req.session.lastDb - 1, 'Users', users.schema).findById(uId, function (err, user) {
             if (user) {
-                models.get(req.session.lastDb - 1, 'Profile', profile).aggregate(
-                {
-                    $project: {
-                        profileAccess: 1
-                    }
-                },
-                {
-                    $match: {
-                        _id: user.profile
-                    }
-                },
-                {
-                    $unwind: "$profileAccess"
-                },
+                    models.get(req.session.lastDb - 1, 'Profile', profile).aggregate(
+                    {
+                        $project: {
+                            profileAccess: 1
+                        }
+                    },
+                    {
+                        $match: {
+                            _id: user.profile
+                        }
+                    },
+                    {
+                        $unwind: "$profileAccess"
+                    },
 
-                {
-                    $match: {
-                        'profileAccess.module': mid
-                    }
-                },
+                    {
+                        $match: {
+                            'profileAccess.module': mid
+                        }
+                    },
 
-                function (err, result) {
-                    return callback({ error: err, result: result })
-                }
-            );
+                    function (err, result) {
+                        return callback({ error: err, result: result })
+                    }
+                );
             } else {
                 logWriter.log('access.js users.findById error' + err);
                 //res.send(500, { error: 'access.js users.findById error' });
-                callback({error: err});
+                callback({error: 'access.js users.findById error'});
             }
         });
     };
