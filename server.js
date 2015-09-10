@@ -33,6 +33,7 @@ var count = 0;
 var waitForUpdate = false;
 var request = 0;
 var curDb = 0;
+
 mainDb.on('error', console.error.bind(console, 'connection error:'));
 mainDb.once('open', function callback () {
     console.log("Connection to mainDB is success");
@@ -573,16 +574,20 @@ app.post('/login', function (req, res, next) {
     //var targetDb = "demo_" + current.valueOf();
     var targetDb = "demo_" + curDb + '_' + current.valueOf();
     var adminDB = mainDb.db.admin();
+    var resSended = false;
     var cDb = function () {
         ++count;
         console.log('Request for new login ' + (curDb + 1));
+
         adminDB.command({
             copydb: 1,
             //fromdb: "EasyERP",
             fromdb: "CRM",
             todb: targetDb
         }, function (err, result) {
-            if (err) console.log(err);
+            if (err) {
+                console.log(err);
+            }
             if (result) {
                 var dbConnection = mongoose.createConnection('localhost', targetDb, {server: {poolSize: 3}});//{ server: { poolSize: 2 } }
                 dbConnection.once('open', function () {
@@ -594,6 +599,7 @@ app.post('/login', function (req, res, next) {
                             var currentDate = new Date().getTime();
                             var startDate = new Date(currentDate - 8 * 1000 * 60 * 60 * 24).getTime();
                             var endDate = new Date(currentDate - 4 * 1000 * 60 * 60 * 24).getTime();
+
                             collections.forEach(function (collection, colIndex) {
                                 collection.find().toArray(function (err, docs) {
                                     if (docs) {
@@ -623,7 +629,12 @@ app.post('/login', function (req, res, next) {
                                     } else {
                                         if (err) {
                                             console.log(err);
-                                            res.send(500, {error: 'error'});
+
+                                            if(!resSended){
+                                                resSended = true;
+
+                                                res.send(500, {error: 'error'});
+                                            }
                                             --count;
                                         }
                                     }
@@ -631,7 +642,13 @@ app.post('/login', function (req, res, next) {
                             });
                         } else if (err) {
                             console.log(err);
-                            res.send(500, {error: 'error'});
+
+
+                            if(!resSended){
+                                resSended = true;
+
+                                res.send(500, {error: 'error'});
+                            }
                             --count;
                         }
                         if (!waitForUpdate)
@@ -659,7 +676,14 @@ app.post('/login', function (req, res, next) {
                     var lastAccess = new Date();
                     req.session.lastAccess = lastAccess;
                     req.session.lastDb = dbsArray.length;
-                    res.send(200, {success: 'Connection success'});
+
+                    if(!resSended){
+                        resSended = true;
+
+                        res.send(200, {success: 'Connection success'});
+                    }
+
+
 
                     tracker.track({
                         ip: ip,
@@ -726,7 +750,11 @@ app.post('/login', function (req, res, next) {
                 dbConnection.on('error', function (error) {
                     console.log('Error in Binding for error');
                     console.log(error);
-                    res.send(500, {error: 'error'});
+                    if(!resSended) {
+                        resSended = true;
+
+                        res.send(500, {error: 'error'});
+                    }
                 });
             }
         });
